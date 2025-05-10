@@ -8,11 +8,11 @@ services:
 
   redis-primary:
     image: redis:latest
-    hostname: redis-primary
+    hostname: db-primary
 
   redis-replica:
     image: redis:latest
-    command: ["redis-server", "--replicaof", "redis-primary", "6379"]
+    command: ["redis-server", "--replicaof", "db-primary", "6379"]
     deploy:
       replicas: 3
     labels:
@@ -40,3 +40,7 @@ services:
     volumes:
       - ./traefik.yml:/etc/traefik/traefik.yml
       - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      default:
+        aliases:
+          - db-replica
