@@ -1,0 +1,43 @@
+services:
+  consul:
+    image: hashicorp/consul
+    ports:
+      - "8500:8500"
+      - "8600:8600/udp"
+    command: agent -dev -client=0.0.0.0
+
+  registrator:
+    #image: metabrainz/serviceregistrator:latest
+    image: ghcr.io/rizerphe-student/serviceregistrator:edge
+    command: --ip 172.17.0.1 --consul-host consul --consul-port 8500 --debug
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      - consul
+
+  redis-primary:
+    image: redis:latest
+    hostname: redis-primary
+    expose:
+      - "6379"
+    environment:
+      SERVICE_NAME: redis-primary
+      SERVICE_TAGS: primary
+    networks:
+      - backend
+
+  redis-replica:
+    image: redis:latest
+    command: ["redis-server", "--replicaof", "redis-primary", "6379"]
+    expose:
+      - "6379"
+    environment:
+      SERVICE_NAME: redis-replica
+      SERVICE_TAGS: replica
+    deploy:
+      replicas: 3
+    networks:
+      - backend
+
+networks:
+  backend:
