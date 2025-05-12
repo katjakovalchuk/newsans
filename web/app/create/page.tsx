@@ -1,5 +1,4 @@
 import { redirect } from 'next/navigation';
-import { getUser } from '@/app/actions';
 import CreatePostForm from './CreatePostForm';
 import { createClient } from '@/lib/supabase-server';
 

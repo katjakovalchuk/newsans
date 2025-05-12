@@ -57,8 +57,8 @@ export default function AuthForm() {
           form.reset();
         }
       }
-    } catch (err: any) {
-      toast.error(err.message || 'An error occurred');
+    } catch (err: Error | unknown) {
+      toast.error(err instanceof Error ? err.message : 'An error occurred');
     } finally {
       setLoading(false);
     }

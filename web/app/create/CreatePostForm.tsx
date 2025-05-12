@@ -53,8 +53,8 @@ export default function CreatePostForm() {
       toast.success('Post created successfully!');
       router.push('/');
       router.refresh();
-    } catch (error: any) {
-      toast.error(error.message || 'Something went wrong');
+    } catch (error: Error | unknown) {
+      toast.error(error instanceof Error ? error.message : 'Something went wrong');
     } finally {
       setIsSubmitting(false);
     }
