@@ -5,6 +5,7 @@ declare namespace NodeJS {
     SUPABASE_SERVICE_ROLE_KEY: string;
     REDIS_WRITE_URL?: string;
     REDIS_READ_URL?: string;
+    REDIS_QUEUE_URL?: string;
     NEXT_PUBLIC_APP_URL?: string;
   }
 } 

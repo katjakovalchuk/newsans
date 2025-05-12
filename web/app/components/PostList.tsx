@@ -2,6 +2,7 @@ import { Post } from '@/types/posts';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { getAllPosts } from '@/lib/redis';
+import ReportButton from './ReportButton';
 
 // Get posts directly from Redis instead of via API
 async function getPosts(): Promise<Post[]> {
@@ -33,7 +34,10 @@ export default async function PostList() {
             <Separator />
             <CardFooter className="pt-4">
               <div className="flex flex-col w-full text-sm text-muted-foreground">
-                <span>{post.authorEmail}</span>
+                <div className="flex justify-between items-center">
+                  <span>{post.authorEmail}</span>
+                  <ReportButton postId={post.id} postTitle={post.title} />
+                </div>
                 <time dateTime={post.createdAt}>
                   {new Date(post.createdAt).toLocaleDateString()}
                 </time>
