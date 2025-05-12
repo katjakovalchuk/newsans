@@ -3,6 +3,7 @@ services:
     build: ./ds-logger
     depends_on:
       - redis-queue
+      - consul
     networks:
       - default
   redis-queue:
