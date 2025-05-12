@@ -38,11 +38,11 @@ services:
 
   web:
     build: ./web
-    ports:
-      - "3000:3000" # local preview, not used by Traefik in prod
     depends_on:
       - redis-queue
       - consul
+    deploy:
+      replicas: 3
     networks: [default]
     labels:
       - "traefik.enable=true"
