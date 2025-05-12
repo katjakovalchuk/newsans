@@ -1,49 +1,62 @@
-import { createMiddlewareClient } from '@supabase/auth-helpers-nextjs';
+import { createServerClient } from '@supabase/ssr';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 export async function middleware(request: NextRequest) {
-  // Create a Supabase client configured to use cookies
-  const response = NextResponse.next();
-  const supabase = createMiddlewareClient({ req: request, res: response });
+  let response = NextResponse.next({
+    request: {
+      headers: request.headers,
+    },
+  });
 
-  try {
-    // Refresh session if expired - required for Server Components
-    const { data } = await supabase.auth.getSession();
-    const session = data.session;
-
-    // Bypass authentication checks temporarily for debugging
-    // Just pass through all requests and let client-side handle auth
-    return response;
-
-    /* Original logic - commented out for debugging
-    // Check if we need to protect this route
-    const path = request.nextUrl.pathname;
-    const isProtectedRoute = path.startsWith('/profile');
-    
-    // If the route is protected and there's no active session, redirect to /auth
-    if (isProtectedRoute && !session) {
-      const redirectUrl = new URL('/auth', request.url);
-      return NextResponse.redirect(redirectUrl);
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get(name: string) {
+          return request.cookies.get(name)?.value;
+        },
+        set(name: string, value: string, options) {
+          // If the cookie is updated, update the cookies for the request and response
+          request.cookies.set({
+            name,
+            value,
+            ...options,
+          });
+          response = NextResponse.next({
+            request: {
+              headers: request.headers,
+            },
+          });
+          response.cookies.set({
+            name,
+            value,
+            ...options,
+          });
+        },
+        remove(name: string, options) {
+          // If the cookie is removed, update the cookies for the request and response
+          request.cookies.delete(name);
+          response = NextResponse.next({
+            request: {
+              headers: request.headers,
+            },
+          });
+          response.cookies.delete(name);
+        },
+      },
     }
+  );
 
-    // If the user is trying to access /auth but they're already logged in,
-    // redirect them to /profile
-    if (path === '/auth' && session) {
-      const redirectUrl = new URL('/profile', request.url);
-      return NextResponse.redirect(redirectUrl);
-    }
-    */
-    
-    return response;
-  } catch (error) {
-    console.error('Middleware error:', error);
-    // If there's an error, just continue to the page
-    return response;
-  }
+  // This will refresh session if expired - required for Server Components
+  // https://supabase.com/docs/guides/auth/server-side/nextjs
+  await supabase.auth.getSession();
+  
+  return response;
 }
 
-// Modify the matcher to exclude profile route for now
+// Include all routes that need authentication refreshing
 export const config = {
-  matcher: ['/auth', '/api/:path*'],
+  matcher: ['/((?!_next/static|_next/image|favicon.ico).*)'],
 }; 

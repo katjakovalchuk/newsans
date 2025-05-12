@@ -33,7 +33,7 @@ export default function RootLayout({
         <AuthProvider>
           <Navigation />
           <main className="container py-4">{children}</main>
-          <Toaster />
+          <Toaster position="bottom-right" />
         </AuthProvider>
       </body>
     </html>
